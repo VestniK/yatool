@@ -1,9 +1,11 @@
 {
     "bottles": {},
     "extensions": {
-        "registry_endpoint": "https://devtools-registry.s3.yandex.net"
+        "registry_endpoint": "https://devtools-registry.s3.yandex.net",
+        "rust_miror": "http://static.rust-lang.org/dist"
     },
     "resources": {
+        "42": "{rust_miror}/2025-11-10/rust-1.91.1-x86_64-unknown-linux-gnu.tar.gz",
         "11789649364": "{registry_endpoint}/11789649364",
         "11789665637": "{registry_endpoint}/11789665637",
         "11469222610": "{registry_endpoint}/11469222610",
@@ -2579,6 +2581,7 @@
         "7663495611": "{registry_endpoint}/7663495611"
     },
     "resources_descriptions": {
+        "42": "Rust 1.91.1 toolchain for linux-x86_64",
         "11789649364": "/Users/pazus/arc/arcadia/devtools/ktlint_build/package_darwin.json",
         "11789665637": "/Users/pazus/arc/arcadia/devtools/ktlint_build/package_darwin.json",
         "11469222610": "AST_INDEX_EXECUTABLE-linux-aarch64-none-ast-index-v3.30.0-linux-arm64.tar.gz",

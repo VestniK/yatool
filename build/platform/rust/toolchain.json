@@ -1,0 +1,8 @@
+{
+  "by_platform": {
+    "linux-x86_64": {
+      "uri": "sbr:42",
+      "strip_prefix": 1
+    }
+  }
+}
