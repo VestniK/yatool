@@ -1,3 +1,5 @@
+mod greet;
+
 fn main() {
-    println!("Hello world");
+    greet::say_hello("World");
 }
