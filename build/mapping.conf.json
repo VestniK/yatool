@@ -1,9 +1,11 @@
 {
     "bottles": {},
     "extensions": {
-        "registry_endpoint": "https://devtools-registry.s3.yandex.net"
+        "registry_endpoint": "https://devtools-registry.s3.yandex.net",
+        "rust_miror": "https://static.rust-lang.org/dist"
     },
     "resources": {
+        "42": "{rust_miror}/2025-03-18/rust-1.85.1-x86_64-unknown-linux-gnu.tar.gz",
         "6277415836": "{registry_endpoint}/6277415836",
         "2214720943": "{registry_endpoint}/2214720943",
         "2214542408": "{registry_endpoint}/2214542408",
@@ -1513,6 +1515,7 @@
         "7663495611": "{registry_endpoint}/7663495611"
     },
     "resources_descriptions": {
+        "42": "Rust 1.85.1 toolchain for linux-x86_64",
         "6277415836": "Allure 2.29.0",
         "2214720943": "Clang 11.0.0 for darwin-arm64",
         "2214542408": "Clang 11.0.0 for darwin-x86_64 from task/828474520 with LTO and PGO",
