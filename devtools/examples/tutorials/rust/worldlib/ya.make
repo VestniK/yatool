@@ -1,0 +1,3 @@
+RUST_LIBRARY()
+END()
+
