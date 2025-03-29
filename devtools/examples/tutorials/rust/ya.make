@@ -1,3 +1,4 @@
-RESURSES(
+RECURSE(
     hello
+    worldlib
 )
