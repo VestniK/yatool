@@ -1,4 +1,5 @@
 RECURSE(
     hello
+    hellodep
     worldlib
 )
