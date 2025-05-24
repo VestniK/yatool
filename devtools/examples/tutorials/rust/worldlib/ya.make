@@ -1,3 +1,2 @@
-RUST_LIBRARY()
+RUST_CRATE()
 END()
-
