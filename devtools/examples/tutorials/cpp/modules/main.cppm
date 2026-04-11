@@ -4,7 +4,9 @@ module;
 
 export module main;
 
+import greet;
+
 int main() {
-  std::cout << "Hello world\n";
+  std::cout << make_greet("World") << '\n';
   return 0;
 }
