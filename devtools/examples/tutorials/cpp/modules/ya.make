@@ -1,6 +1,8 @@
 PROGRAM(hello)
 
-CPP_MODULE(main.cppm)
-CPP_MODULE(greet.cppm)
+SRCS(
+    main.cppm
+    greet.cppm
+)
 
 END()
