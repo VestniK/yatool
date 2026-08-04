@@ -6,6 +6,8 @@
     },
     "resources": {
         "42": "{rust_miror}/2025-11-10/rust-1.91.1-x86_64-unknown-linux-gnu.tar.gz",
+        "43": "{rust_miror}/2025-11-10/rust-1.91.1-aarch64-apple-darwin.tar.gz",
+        "44": "{rust_miror}/2025-11-10/rust-1.91.1-x86_64-apple-darwin.tar.gz",
         "11469222610": "{registry_endpoint}/11469222610",
         "11469225421": "{registry_endpoint}/11469225421",
         "6277415836": "{registry_endpoint}/6277415836",
@@ -2168,6 +2170,8 @@
     },
     "resources_descriptions": {
         "42": "Rust 1.91.1 toolchain for linux-x86_64",
+        "43": "Rust 1.91.1 toolchain for darwin-arm64",
+        "44": "Rust 1.91.1 toolchain for darwin-x86_64",
         "11469222610": "AST_INDEX_EXECUTABLE-linux-aarch64-none-ast-index-v3.30.0-linux-arm64.tar.gz",
         "11469225421": "AST_INDEX_EXECUTABLE-linux-none-ast-index-v3.30.0-linux-x86_64.tar.gz",
         "6277415836": "Allure 2.29.0",
