@@ -1,5 +1,3 @@
-extern crate anyhow;
-
 use std::io::stdin;
 
 fn main() -> anyhow::Result<()> {

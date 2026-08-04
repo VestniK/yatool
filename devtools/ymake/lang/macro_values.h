@@ -88,6 +88,7 @@ enum class EMacroFunction: ui32 {
     Split,
     At,
     Trim,
+    Exclude,
     //
     Count
 };
