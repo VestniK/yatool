@@ -1,5 +1,3 @@
-extern crate worldlib;
-
 mod greet;
 
 fn main() {

@@ -4,5 +4,6 @@ RECURSE(
     cpp_dep
     cpp_interop
     cpp_sandwich
+    crate_name
     worldlib
 )

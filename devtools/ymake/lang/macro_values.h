@@ -85,6 +85,7 @@ enum class EMacroFunction: ui32 {
     DirAllowed,
     SkipByExtFilter,
     NoBuildRoot,
+    Exclude,
     //
     Count
 };
