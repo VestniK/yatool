@@ -6,5 +6,6 @@ RECURSE(
     cpp_sandwich
     crate_name
     proc_macro
+    py_interop
     worldlib
 )
