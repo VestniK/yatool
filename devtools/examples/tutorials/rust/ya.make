@@ -5,5 +5,6 @@ RECURSE(
     cpp_interop
     cpp_sandwich
     crate_name
+    proc_macro
     worldlib
 )
