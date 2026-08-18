@@ -1,11 +1,13 @@
 RECURSE(
     hello
     hellodep
+    bench
     cpp_dep
     cpp_interop
     cpp_sandwich
     crate_name
     proc_macro
     py_interop
+    tests
     worldlib
 )

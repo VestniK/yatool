@@ -1557,6 +1557,42 @@ def go_bench(fields, unit, *args):
         unit.set_property(["DART_DATA", data])
 
 
+@df.with_fields(
+    YTEST_FIELDS_BASE
+    + YTEST_FIELDS_EXTRA
+    + (
+        df.TestName.value,
+        df.TestData.from_macro_args_and_unit,
+        df.Requirements.from_macro_args_and_unit,
+        df.TestPartition.value,
+        df.ModuleLang.value,
+        df.DockerImage.value,
+    )
+)
+def rust_test(fields, unit, *args):
+    keywords = {
+        "DEPENDS": -1,
+        "DATA": -1,
+        "TIMEOUT": 1,
+        "FORK_MODE": 1,
+        "SPLIT_FACTOR": 1,
+        "FORK_SUBTESTS": 0,
+        "FORK_TESTS": 0,
+    }
+    flat_args, spec_args = _common.sort_by_keywords(keywords, args)
+
+    if unit.get('ADD_SRCDIR_TO_TEST_DATA') == "yes":
+        unit.ondata_files(_common.get_norm_unit_path(unit))
+
+    dart_record = create_dart_record(fields, unit, flat_args, spec_args)
+    if not dart_record:
+        return
+
+    data = dump_test(unit, dart_record)
+    if data:
+        unit.set_property(["DART_DATA", data])
+
+
 def onadd_ytest(unit, *args):
     keywords = {
         "DEPENDS": -1,
@@ -1611,3 +1647,5 @@ def onadd_ytest(unit, *args):
         coverage_extractor(unit, *args)
     elif test_type == "go.bench":
         go_bench(unit, *args)
+    elif test_type in ("rust.test", "rust.bench"):
+        rust_test(unit, *args)
