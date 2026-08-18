@@ -17,3 +17,31 @@ https://static.rust-lang.org/dist/channel-rust-stable.toml
 Сам подвоз тулчейна можно описать с помощью модуля `RESOURCES_LIBRARY` и макроса
 `DECLARE_EXTERNAL_HOST_RESOURCES_BUNDLE_BY_JSON`. Проще всего списать эту домашку у соседа, например
 подглядев как устроена эта машинерия для JDK либо для clang'а.
+
+
+### Требование к ymake
+
+`build/conf/rust.conf` описывает модули с помощью модификатора команд `exclude`,
+добавленного в `devtools/ymake` вместе с самой поддержкой раста. Ни один
+выпущенный ymake его не знает, поэтому со стоковой `ya` конфигурация любого
+`RUST_*` модуля падает:
+
+```text
+Error[-WDetails]: in $B/.../hello: Command processing error (module RUST_PROGRAM): unknown modifier exclude
+```
+
+Обойтись без него нельзя: модуль публикует свой `--extern` в ту же `.GLOBAL`
+переменную, которую сам же и читает, а `--extern`, указывающий на ещё не
+собранный артефакт, rustc открывает сразу, как только что-нибудь в крейте
+называет крейт по имени (`anyhow` так делает).
+
+Пока обновлённый ymake не разъехался, растовые цели собираются своим:
+
+```sh
+ya make devtools/ymake
+ya make -DBUILD_RUST_EXAMPLES=yes --ymake-bin <path>/ymake devtools/examples/tutorials/rust
+```
+
+Поэтому же `RECURSE` в растовые примеры закрыт флагом `BUILD_RUST_EXAMPLES`, а
+не одним `HAVE_RUST`: без него `ya make devtools/examples/tutorials` ломался бы
+у всех.
