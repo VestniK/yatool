@@ -1,4 +1,6 @@
-greetmac::greet_with!("World");
+use greetmac::greet_with;
+
+greet_with!("World");
 
 fn main() {
     println!("{}", greet());
