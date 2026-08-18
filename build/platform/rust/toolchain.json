@@ -1,15 +1,15 @@
 {
   "by_platform": {
     "linux-x86_64": {
-      "uri": "sbr:42",
+      "uri": "sbr:9900000000001",
       "strip_prefix": 1
     },
     "darwin-arm64": {
-      "uri": "sbr:43",
+      "uri": "sbr:9900000000002",
       "strip_prefix": 1
     },
     "darwin-x86_64": {
-      "uri": "sbr:44",
+      "uri": "sbr:9900000000003",
       "strip_prefix": 1
     }
   }
