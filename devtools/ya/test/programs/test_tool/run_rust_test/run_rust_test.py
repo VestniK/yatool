@@ -109,6 +109,11 @@ def gen_suite(project_path):
 
 
 def list_tests(opts):
+    """
+    -> (names, execution). The execution is returned rather than swallowed:
+    an empty listing means "this crate has no tests" only when the binary
+    actually ran, and the caller has to tell the two apart.
+    """
     kind = "benchmark" if opts.bench_run else "test"
     cmd = [opts.binary] + (["--bench"] if opts.bench_run else []) + ["--list"]
     res = process.execute(cmd, check_exit_code=False, env=os.environ.copy())
@@ -117,7 +122,7 @@ def list_tests(opts):
         match = LIST_LINE.match(line.strip())
         if match and match.group(2) == kind:
             names.append(match.group(1))
-    return names
+    return names, res
 
 
 def select_tests(opts, suite_name, listed):
@@ -147,6 +152,13 @@ def run_cmd(opts, selected, run_all):
 def parse_output(content):
     """
     -> (tests: {name: (status, metrics)}, outputs: {name: [lines]}, suite_ok: bool|None)
+
+    Inside a `---- <name> stdout ----` block every line belongs to the failing
+    test, and only the three lines libtest itself can put there end it: the
+    header of the next block, the bare `failures:` summary, and the final
+    `test result:`. Result lines are deliberately not matched there -- a test
+    that prints `test whatever ... ok` is printing, not reporting, and used to
+    invent a passing testcase out of the failing one's output.
     """
     tests = {}
     outputs = {}
@@ -154,33 +166,36 @@ def parse_output(content):
     curr_failure = None
     for line in content.split("\n"):
         stripped = line.strip()
+
         match = FAILURE_HEADER.match(stripped)
         if match:
             curr_failure = match.group(1)
             outputs.setdefault(curr_failure, [])
             continue
+
+        if curr_failure is not None:
+            if stripped == 'failures:':
+                curr_failure = None
+                continue
+            if not SUITE_RESULT.match(stripped):
+                outputs[curr_failure].append(line)
+                continue
+            curr_failure = None
+
         match = BENCH_LINE.match(stripped)
         if match:
-            curr_failure = None
             ns_per_iter = float(match.group(2).replace(",", ""))
             deviation = float(match.group(3).replace(",", ""))
             tests[match.group(1)] = (const.Status.GOOD, {"ns_per_iter": ns_per_iter, "deviation_ns": deviation})
             continue
         match = TEST_LINE.match(stripped)
         if match:
-            curr_failure = None
             tests[match.group(1)] = (STATUS[match.group(2)], None)
             continue
         match = SUITE_RESULT.match(stripped)
         if match:
-            curr_failure = None
             suite_ok = match.group(1) == 'ok'
             continue
-        if curr_failure is not None:
-            if stripped == 'failures:':
-                curr_failure = None
-            else:
-                outputs[curr_failure].append(line)
     return tests, outputs, suite_ok
 
 
@@ -196,7 +211,21 @@ def run_tests(opts):
     if not os.path.exists(opts.output_dir):
         os.makedirs(opts.output_dir)
 
-    listed = list_tests(opts)
+    listed, listing = list_tests(opts)
+    if listing.returncode != 0:
+        # No listing means no testcases to report, and reporting nothing is
+        # reporting success. A binary that dies here -- a missing dynamic
+        # library, a panic in a static initializer -- must not pass silently.
+        suite = gen_suite(opts.project_path)
+        suite.add_chunk_error(
+            '[[bad]]Test binary failed to list its tests, exit code {}\n{}[[rst]]'.format(
+                listing.returncode, (listing.std_err or '').strip()
+            ),
+            const.Status.CRASHED,
+        )
+        shared.dump_trace_file(suite, opts.tracefile)
+        return
+
     selected = select_tests(opts, suite_name, listed)
 
     # Everything selected is dumped as not-launched up front, so a crash
@@ -241,6 +270,9 @@ def run_tests(opts):
     # Under --bench libtest still prints every plain #[test] as "ignored";
     # those were never in the benchmark listing and must not become phantom
     # SKIPPED entries of a bench suite.
+    # No per-test duration is reported: the stable text format gives only the
+    # suite total ("finished in 0.00s"), and splitting that across testcases
+    # would be an invention. TestCase.elapsed stays at its 0.0 default.
     wanted = set(selected)
     for name, (status, metrics) in tests.items():
         if name not in wanted:
