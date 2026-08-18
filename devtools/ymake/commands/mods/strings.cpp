@@ -226,7 +226,18 @@ namespace {
             [[maybe_unused]] ICommandSequenceWriter* writer
         ) const override {
             CheckArgCount(args);
-            auto unwanted = std::get<TString>(args[0]);
+            // Taken apart rather than std::get'ed: a non-string first argument
+            // would leave as a bare std::bad_variant_access naming neither the
+            // modifier nor the type, and every other type mismatch here is
+            // reported as TBadArgType.
+            const auto& unwanted = std::visit(TOverloaded{
+                [](const TString& s) -> const TString& {
+                    return s;
+                },
+                [&](const auto& x) -> const TString& {
+                    throw TBadArgType(Name, x);
+                }
+            }, args[0]);
             return std::visit(TOverloaded{
                 [](TTermError) -> TTermValue {
                     Y_ABORT();
