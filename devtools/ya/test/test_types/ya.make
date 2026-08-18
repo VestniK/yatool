@@ -17,6 +17,7 @@ PY_SRCS(
     junit.py
     library_ut.py
     py_test.py
+    rust_test.py
     ts_test.py
 )
 
