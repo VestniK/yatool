@@ -3108,6 +3108,17 @@ def _resolve_test_tool_only(graph_maker, toolchain, debug_id, opts):
 
 
 def _resolve_global_tools(graph_maker, toolchain, opts, targets, resources, debug_id):
+    # An opensource export may lack some of the resource directories (e.g.
+    # build/platform/test_tool when the local test_tool is used instead).
+    # Configuring a missing target is a hard configure error, so skip them.
+    #
+    # Warn rather than log at debug: skipping is right for an export that never
+    # had the directory, but the same code path swallows a directory that went
+    # missing by accident, and that used to be a configure error.
+    missing = [t for t in targets if not os.path.exists(os.path.join(opts.arc_root, t))]
+    if missing:
+        logger.warning("Global tool targets are missing from the source tree and will be skipped: %s", missing)
+        targets = [t for t in targets if t not in missing]
     debug_id = (debug_id or "") + "-global"
     tg = graph_maker.make_graphs(
         toolchain,

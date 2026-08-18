@@ -32,7 +32,10 @@ CFLAGS(
     -DINSTALLDIR=\"/var/empty/bison-3.7.6/bin\"
 )
 
-IF (OPENSOURCE)
+# --allow-multiple-definition is a GNU ld / ELF lld flag; ld64.lld rejects it,
+# so it must not reach the darwin link. Nothing needs it there either: the
+# duplicate definitions it papers over only clash under the ELF linkers.
+IF (OPENSOURCE AND NOT OS_DARWIN)
     LDFLAGS(-Wl,--allow-multiple-definition)
 ENDIF()
 

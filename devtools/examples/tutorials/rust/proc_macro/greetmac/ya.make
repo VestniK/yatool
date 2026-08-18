@@ -1,0 +1,2 @@
+RUST_PROC_MACRO()
+END()

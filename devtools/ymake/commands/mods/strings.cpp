@@ -210,6 +210,65 @@ namespace {
     //
     //
 
+    class TExclude: public TBasicModImpl {
+        // Drops the list items equal to the first argument.
+        //
+        // Written for variables a module both contributes to and consumes, where
+        // its own contribution has to be left out: a module's `_GLOBAL` variable
+        // holds the union over its peer closure plus whatever it published
+        // itself, and the latter is not always meaningful to itself.
+    public:
+        TExclude(): TBasicModImpl({.Id = EMacroFunction::Exclude, .Name = "exclude", .Arity = 2}) {
+        }
+        TTermValue Evaluate(
+            [[maybe_unused]] std::span<const TTermValue> args,
+            [[maybe_unused]] const TEvalCtx& ctx,
+            [[maybe_unused]] ICommandSequenceWriter* writer
+        ) const override {
+            CheckArgCount(args);
+            // Taken apart rather than std::get'ed: a non-string first argument
+            // would leave as a bare std::bad_variant_access naming neither the
+            // modifier nor the type, and every other type mismatch here is
+            // reported as TBadArgType.
+            const auto& unwanted = std::visit(TOverloaded{
+                [](const TString& s) -> const TString& {
+                    return s;
+                },
+                [&](const auto& x) -> const TString& {
+                    throw TBadArgType(Name, x);
+                }
+            }, args[0]);
+            return std::visit(TOverloaded{
+                [](TTermError) -> TTermValue {
+                    Y_ABORT();
+                },
+                [](TTermNothing) -> TTermValue {
+                    return TTermNothing();
+                },
+                [&](const TString& body) -> TTermValue {
+                    if (body == unwanted)
+                        return TTermNothing();
+                    return body;
+                },
+                [&](const TVector<TString>& bodies) -> TTermValue {
+                    TVector<TString> result;
+                    result.reserve(bodies.size());
+                    for (auto& body : bodies)
+                        if (body != unwanted)
+                            result.push_back(body);
+                    return std::move(result);
+                },
+                [&](const TTaggedStrings& x) -> TTermValue {
+                    throw TBadArgType(Name, x);
+                }
+            }, args[1]);
+        }
+    } Y_GENERATE_UNIQUE_ID(Mod);
+
+    //
+    //
+    //
+
     class TJoin: public TBasicModImpl {
     public:
         TJoin(): TBasicModImpl({.Id = EMacroFunction::Join, .Name = "join", .Arity = 2}) {

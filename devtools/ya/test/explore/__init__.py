@@ -21,6 +21,7 @@ from devtools.ya.test.test_types import (
     junit,
     library_ut,
     py_test,
+    rust_test,
     ts_test,
 )
 from devtools.ya.test.util import tools
@@ -58,6 +59,8 @@ SUITE_MAP: dict[str, type[types_common.AbstractTestSuite]] = {
     'py.imports': py_test.CheckImportsTestSuite,
     'py3test.bin': py_test.Py3TestBinSuite,
     'pytest.bin': py_test.PyTestBinSuite,
+    'rust.bench': rust_test.RustBenchSuite,
+    'rust.test': rust_test.RustTestSuite,
     'ts_biome': ts_test.BiomeTestSuite,
     'ts_stylelint': ts_test.StylelintTestSuite,
     'tsc_typecheck': ts_test.TscTypecheckTestSuite,

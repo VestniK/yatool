@@ -17,3 +17,64 @@ https://static.rust-lang.org/dist/channel-rust-stable.toml
 Сам подвоз тулчейна можно описать с помощью модуля `RESOURCES_LIBRARY` и макроса
 `DECLARE_EXTERNAL_HOST_RESOURCES_BUNDLE_BY_JSON`. Проще всего списать эту домашку у соседа, например
 подглядев как устроена эта машинерия для JDK либо для clang'а.
+
+### Про id ресурсов
+
+`toolchain.json` ссылается на `sbr:` id, которых в Sandbox не существует — они
+живут только в `build/mapping.conf.json`, где им сопоставлены прямые URL'ы
+`static.rust-lang.org`. Такие синтетические id берутся заведомо выше всего, что
+Sandbox выдал и выдаст в обозримом будущем (`99000000000xx` против настоящих
+`~1.2e10` на конец 2025-го): id из реального диапазона во внутреннем контуре
+разрешился бы в совершенно посторонний ресурс.
+
+### Целостность тулчейна, чего здесь нет
+
+Скачивание идёт по `http`, и это не небрежность, а упирается в фетчер. По
+`https` тот же URL отваливается:
+
+```text
+Warn: Failed to fetch resource, status_code=421, error=...: Got 421 at
+https://static.rust-lang.org/dist/2025-11-10/rust-1.91.1-aarch64-apple-darwin.tar.gz
+```
+
+421 Misdirected Request отдаёт CloudFront, за которым живёт
+`static.rust-lang.org`, когда TLS-сессия пришла без SNI: клиент из
+`library/cpp/http/simple` его не выставляет. Тот же URL curl'ом отдаёт 200,
+так что дело именно в клиенте. `https://devtools-registry.s3.yandex.net`
+работает потому, что переживает отсутствие SNI.
+
+Контрольных сумм схема `mapping.conf.json` не поддерживает вовсе: в секции
+`resources` id отображается в URL и только. Рядом с архивом лежит
+`<архив>.sha256`, но сверять его сейчас некому.
+
+То есть на сегодня доставка компилятора не защищена ни каналом, ни хешом.
+Чинится это в фетчере (SNI) и в схеме мапинга (поле с хешом), а не здесь;
+пока не починено — знать об этом стоит.
+
+
+### Требование к ymake
+
+`build/conf/rust.conf` описывает модули с помощью модификатора команд `exclude`,
+добавленного в `devtools/ymake` вместе с самой поддержкой раста. Ни один
+выпущенный ymake его не знает, поэтому со стоковой `ya` конфигурация любого
+`RUST_*` модуля падает:
+
+```text
+Error[-WDetails]: in $B/.../hello: Command processing error (module RUST_PROGRAM): unknown modifier exclude
+```
+
+Обойтись без него нельзя: модуль публикует свой `--extern` в ту же `.GLOBAL`
+переменную, которую сам же и читает, а `--extern`, указывающий на ещё не
+собранный артефакт, rustc открывает сразу, как только что-нибудь в крейте
+называет крейт по имени (`anyhow` так делает).
+
+Пока обновлённый ymake не разъехался, растовые цели собираются своим:
+
+```sh
+ya make devtools/ymake
+ya make -DBUILD_RUST_EXAMPLES=yes --ymake-bin <path>/ymake devtools/examples/tutorials/rust
+```
+
+Поэтому же `RECURSE` в растовые примеры закрыт флагом `BUILD_RUST_EXAMPLES`, а
+не одним `HAVE_RUST`: без него `ya make devtools/examples/tutorials` ломался бы
+у всех.
