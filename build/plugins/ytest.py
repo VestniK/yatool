@@ -1583,6 +1583,7 @@ def rust_test(fields, unit, *args):
 
     if unit.get('ADD_SRCDIR_TO_TEST_DATA') == "yes":
         unit.ondata_files(_common.get_norm_unit_path(unit))
+    unit.ondata_files(get_unit_list_variable(unit, 'TEST_YT_SPEC_VALUE'))
 
     dart_record = create_dart_record(fields, unit, flat_args, spec_args)
     if not dart_record:
