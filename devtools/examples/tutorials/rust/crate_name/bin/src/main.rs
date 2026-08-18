@@ -1,4 +1,7 @@
+// The name here is the module name the ya.make declares --
+// RUST_CRATE(dashed_lib) -- not the directory.
+use dashed_lib::answer;
+
 fn main() {
-    // No `extern crate`, and the name here is CRATE_NAME, not the directory.
-    println!("The answer is {}", dashed_lib::answer());
+    println!("The answer is {}", answer());
 }
