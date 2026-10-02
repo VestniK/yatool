@@ -1,8 +1,8 @@
-extern crate anyhow;
-
 use std::io::stdin;
 
-fn main() -> anyhow::Result<()> {
+use anyhow::Result;
+
+fn main() -> Result<()> {
     println!("Give me a number:");
     let mut num = String::default();
     stdin().read_line(&mut num)?;
